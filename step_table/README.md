@@ -1,4 +1,4 @@
-# steptable
+# step_table
 
 ## Project setup
 ```
