@@ -4,16 +4,16 @@
     <Button type="primary"
             v-on:click='handleAddGongxuObj'>+点击添加工序</Button>
     <ul v-if='datas && datas.length>0'>
-      <li v-for='item in datas'
+      <li v-for='(item,index) in datas'
           :key='item.id'>
         <Button class='i_btn'
                 type="warning"
-                @click='item.modal = true'>
+                @click='item.modal=true'>
           {{item.title}}
         </Button>
         <Modal v-model="item.modal"
                title="选择要添加的工部"
-               @on-ok="ok"
+               @on-ok="ok(index)"
                @on-cancel="cancel">
           <div style="border-bottom: 1px solid #e9e9e9;padding-bottom:6px;margin-bottom:6px;">
             <Checkbox :indeterminate="indeterminate"
@@ -29,10 +29,11 @@
             <Checkbox label="工步五"></Checkbox>
           </CheckboxGroup>
         </Modal>
-        <Table border
+        <Table style="margin-top:6px;"
+               border
                :columns="columns1"
-               :data="data1"
-               v-if='tableShow'></Table>
+               :data="item.gongbu"
+               v-if='item.gongbu.length>0 && item.tableShow'></Table>
       </li>
     </ul>
   </div>
@@ -52,11 +53,9 @@ export default {
       checkAllGroup2: ['工步一', '工步二', '工步三', '工步四', '工步五'],
       modal1: false,
       datas: [
-        /* {
-          title: '工序',
-          id: '工序',
-          key: 'name'
-        } */
+        /* { title: '+关联工步', modal: false, tableShow: true, gongbu: [] },
+        { title: '+关联工步', modal: false, tableShow: true, gongbu: [] },
+        { title: '+关联工步', modal: false, tableShow: true, gongbu: [] }, */
       ],
       columns1: [
         {
@@ -77,20 +76,152 @@ export default {
         },
         {
           title: '工步工时',
-          key: 'Working_hour'
+          key: 'Working_hour',
+          render: (h, params) => {
+            const { Working_hour } = params.row
+            const inp = h('input', {
+              style: {
+                width: '95%',
+                padding: '4px 2px',
+                borderRadius: '4px',
+                border: '1px solid #e9eaec',
+                textAlign: 'center'
+              },
+              attrs: {
+                maxlength: 116
+              },
+              domProps: {
+                value: Working_hour
+              },
+              on: {
+                input: (event) => {
+                  /* this.currentScore = event.target.value */
+                }
+              }
+            })
+            return inp
+          }
         },
         {
           title: '工步数量',
-          key: 'Working_number'
+          key: 'Working_number',
+          render: (h, params) => {
+            const { Working_number } = params.row
+            const inp = h('input', {
+              style: {
+                width: '95%',
+                padding: '4px 2px',
+                borderRadius: '4px',
+                border: '1px solid #e9eaec',
+                textAlign: 'center'
+              },
+              attrs: {
+                maxlength: 116
+              },
+              domProps: {
+                value: Working_number
+              },
+              on: {
+                input: (event) => {
+                  /* this.currentScore = event.target.value */
+                }
+              }
+            })
+            return inp
+          }
         },
         {
           title: '生产工时',
-          key: 'Production_hours'
+          key: 'Production_hours',
+          render: (h, params) => {
+            const { Production_hours } = params.row
+            const inp = h('input', {
+              style: {
+                width: '95%',
+                padding: '4px 2px',
+                borderRadius: '4px',
+                border: '1px solid #e9eaec',
+                textAlign: 'center'
+              },
+              attrs: {
+                maxlength: 116
+              },
+              domProps: {
+                value: Production_hours
+              },
+              on: {
+                input: (event) => {
+                  /* this.currentScore = event.target.value */
+                }
+              }
+            })
+            return inp
+          }
         },
         {
           title: '辅助时间',
-          key: 'Auxiliary_time'
+          key: 'Auxiliary_time',
+          render: (h, params) => {
+            const { Auxiliary_time } = params.row
+            const inp = h('input', {
+              style: {
+                width: '95%',
+                padding: '4px 2px',
+                borderRadius: '4px',
+                border: '1px solid #e9eaec',
+                textAlign: 'center'
+              },
+              attrs: {
+                maxlength: 116
+              },
+              domProps: {
+                value: Auxiliary_time
+              },
+              on: {
+                input: (event) => {
+                  /* this.currentScore = event.target.value */
+                }
+              }
+            })
+            return inp
+          }
         },
+        {
+          title: '操作',
+          key: 'operation',
+          render: (h, params) => {
+            console.log('h:', h, 'params:', params);
+
+            return h('div', [
+              h('Button', {
+                props: {
+                  type: 'primary',
+                  size: 'small'
+                },
+                style: {
+                  marginRight: '18px'
+                },
+                on: {
+                  click: () => {
+                    this.show(params.index)
+                  }
+                }
+              }, 'View'),
+              h('Button', {
+                props: {
+                  type: 'error',
+                  size: 'small'
+                },
+                on: {
+                  click: (key) => {
+                    this.remove(params.index)
+                    window.console.log('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', key)
+                  }
+                }
+              }, 'Delete')
+            ]);
+          }
+        }
       ],
       data1: [],
       arr: [],
@@ -104,8 +235,9 @@ export default {
           unit: '根1',
           Working_hour: 181,
           Working_number: 141,
-          Production_hours: 151,
-          Auxiliary_time: 161,
+          Production_hours: '自动计算',
+          Auxiliary_time: '自动计算',
+          operation: '删除'
         },
         {
           idIndex: 1,
@@ -116,8 +248,9 @@ export default {
           unit: '根2',
           Working_hour: 182,
           Working_number: 142,
-          Production_hours: 152,
-          Auxiliary_time: 162,
+          Production_hours: '自动计算',
+          Auxiliary_time: '自动计算',
+          operation: '删除'
         },
         {
           idIndex: 2,
@@ -128,8 +261,9 @@ export default {
           unit: '根3',
           Working_hour: 183,
           Working_number: 143,
-          Production_hours: 153,
-          Auxiliary_time: 163,
+          Production_hours: '自动计算',
+          Auxiliary_time: '自动计算',
+          operation: '删除'
         },
         {
           idIndex: 3,
@@ -140,8 +274,9 @@ export default {
           unit: '根4',
           Working_hour: 184,
           Working_number: 144,
-          Production_hours: 154,
-          Auxiliary_time: 164,
+          Production_hours: '自动计算',
+          Auxiliary_time: '自动计算',
+          operation: '删除'
         },
         {
           idIndex: 4,
@@ -152,36 +287,43 @@ export default {
           unit: '根5',
           Working_hour: 185,
           Working_number: 145,
-          Production_hours: 155,
-          Auxiliary_time: 165,
+          Production_hours: '自动计算',
+          Auxiliary_time: '自动计算',
+          operation: '删除'
         },
       ]
     }
   },
   methods: {
     handleAddGongxuObj: function () {
-      this.datas.push({ title: '+关联工步', modal: false })
+      this.datas.push({ title: '+关联工步', modal: false, tableShow: true, gongbu: [] })
     },
     handleAddGongbuObj: function () {
       window.console.log(1)
     },
-    ok () {
+    ok (btnIndex) {
       this.$Message.info('Clicked ok');
       window.console.log('您勾选的数组集合为： ', this.checkAllGroup)
       /* this.data1 = [] */
       this.checkAllGroup.forEach((item) => {
-        window.console.log(item)
+        /*  window.console.log(item) */
         for (let index = 0; index < this.checkAllGroup2.length; index++) {
           if (this.checkAllGroup2[index] === item) {
-            window.console.log('tian la lu ~~', index)
-            this.arr.push(index)
-            window.console.log('tian la lu arr ~~', this.arr)
-            this.data1.push(this.data2[index])
+            /* window.console.log('tian la lu index~~', index) */
+            /* this.arr.push(index)
+            window.console.log('tian la lu arr ~~', this.arr) */
+            /* window.console.log('tian la lu datas ~~~~~~', this.datas) */
+            /* window.console.log('tian la lu btnIndex ~~~~~~', btnIndex) */
+            this.datas[btnIndex].gongbu.push(this.data2[index])
+            this.datas[btnIndex].tableShow = true
+            /* this.datas[index][0].push(this.data2[index]) */
+
           }
         }
       })
       /* this.data1.push(data2[index]) */
-      this.tableShow = true
+      /* this.tableShow = true */
+
     },
     cancel () {
       this.$Message.info('Clicked cancel');
@@ -213,6 +355,21 @@ export default {
         this.indeterminate = false;
         this.checkAll = false;
       }
+    },
+    handleBtnClick (index) {
+
+      window.console.log('btnIndex', index);
+
+    },
+    show (index) {
+      this.$Modal.info({
+        title: 'User Info',
+        content: `编号：${this.data2[index].number}<br>工步名称：${this.data2[index].Working_name}<br>工步描述：${this.data2[index].Name_of_work_step}<br>单位：${this.data2[index].unit}<br>工步工时：${this.data2[index].Working_hour}<br>工步数量：${this.data2[index].Working_number}<br>生产工时：${this.data2[index].Production_hours}<br>辅助时间：${this.data2[index].Auxiliary_time}`
+      })
+    },
+    remove (index) {
+      window.console.log('removeIndex', index);
+      this.datas.splice(index, 1);
     }
   },
   mounted () { }
